@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template for AWS Step Functions - State Machine
+Description: CloudFormation template for AWS Step Functions - State Machine for Courier default
 Resources:
   StateMachineComponent:
     Type: "AWS::StepFunctions::StateMachine"
