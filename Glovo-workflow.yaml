@@ -1,0 +1,177 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for AWS Step Functions - State Machine
+Resources:
+  StateMachineComponent:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      StateMachineName: glovo-courier-default
+      DefinitionString: |-
+        {
+          "StartAt": "Preparing data (Lambda)",
+          "States": {
+            "Preparing data (Lambda)": {
+              "Parameters": {
+                "FunctionName": "glovo-pre-processing",
+                "Payload": {
+                  "JobName.$": "$$.Execution.Input['JobName']"
+                }
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Type": "Task",
+              "Next": "Training (SageMaker)",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 15,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 4.0
+                }
+              ]
+            },
+            "Training (SageMaker)": {
+              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+              "Parameters": {
+                "AlgorithmSpecification": {
+                  "TrainingImage": "685385470294.dkr.ecr.eu-west-1.amazonaws.com/xgboost:1",
+                  "TrainingInputMode": "File"
+                },
+                "OutputDataConfig": {
+                  "S3OutputPath": "s3://antonio-rodriguez-workshop/glovo/workflow/output"
+                },
+                "StoppingCondition": {
+                  "MaxRuntimeInSeconds": 86400
+                },
+                "ResourceConfig": {
+                  "InstanceCount": 1,
+                  "InstanceType": "ml.m5.xlarge",
+                  "VolumeSizeInGB": 5
+                },
+                "RoleArn": "arn:aws:iam::889960878219:role/service-role/AmazonSageMaker-ExecutionRole-20180920T165537",
+                "InputDataConfig": [
+                  {
+                    "DataSource": {
+                      "S3DataSource": {
+                        "S3DataType": "S3Prefix",
+                        "S3Uri": "s3://antonio-rodriguez-workshop/glovo/workflow/train",
+                        "S3DataDistributionType": "FullyReplicated"
+                      }
+                    },
+                    "ContentType": "csv",
+                    "ChannelName": "train"
+                  },
+                  {
+                    "DataSource": {
+                      "S3DataSource": {
+                        "S3DataType": "S3Prefix",
+                        "S3Uri": "s3://antonio-rodriguez-workshop/glovo/workflow/validation",
+                        "S3DataDistributionType": "FullyReplicated"
+                      }
+                    },
+                    "ContentType": "csv",
+                    "ChannelName": "validation"
+                  }
+                ],
+                "HyperParameters": {
+                  "objective": "binary:logistic",
+                  "alpha": "0.0017958870152480393",
+                  "colsample_bytree": "0.8974444697232986",
+                  "eta": "0.378416419404957",
+                  "gamma": "0.0038479366336815115",
+                  "max_depth": "22",
+                  "min_child_weight": "3.4445863514152535",
+                  "num_round": "139",
+                  "subsample": "0.7432022124726009"
+                },
+                "TrainingJobName.$": "$$.Execution.Input['JobName']"
+              },
+              "Type": "Task",
+              "Next": "Save model (SageMaker)"
+            },
+            "Save model (SageMaker)": {
+              "Parameters": {
+                "ExecutionRoleArn": "arn:aws:iam::889960878219:role/service-role/AmazonSageMaker-ExecutionRole-20180920T165537",
+                "ModelName.$": "$$.Execution.Input['ModelName']",
+                "PrimaryContainer": {
+                  "Environment": {},
+                  "Image": "685385470294.dkr.ecr.eu-west-1.amazonaws.com/xgboost:1",
+                  "ModelDataUrl.$": "$['ModelArtifacts']['S3ModelArtifacts']"
+                }
+              },
+              "Resource": "arn:aws:states:::sagemaker:createModel",
+              "Type": "Task",
+              "Next": "Validating loss (Lambda)"
+            },
+            "Validating loss (Lambda)": {
+              "Parameters": {
+                "FunctionName": "glovo-validation",
+                "Payload": {
+                  "JobName.$": "$$.Execution.Input['JobName']"
+                }
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Type": "Task",
+              "Next": "validation loss < 3% ?",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 15,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 4.0
+                }
+              ]
+            },
+            "validation loss < 3% ?": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$['Payload']['vloss']",
+                  "StringLessThan": "0.03",
+                  "Next": "Batch inference (SageMaker)"
+                },
+                {
+                  "Variable": "$['Payload']['vloss']",
+                  "StringGreaterThanEquals": "0.03",
+                  "Next": "Worse model"
+                }
+              ]
+            },
+            "Batch inference (SageMaker)": {
+              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+              "Parameters": {
+                "TransformJobName.$": "$$.Execution.Input['JobName']",
+                "ModelName.$": "$$.Execution.Input['ModelName']",
+                "TransformInput": {
+                  "DataSource": {
+                    "S3DataSource": {
+                      "S3DataType": "S3Prefix",
+                      "S3Uri": "s3://antonio-rodriguez-workshop/glovo/workflow/test"
+                    }
+                  },
+                  "ContentType": "text/csv",
+                  "SplitType": "Line"
+                },
+                "TransformOutput": {
+                  "S3OutputPath": "s3://sagemaker-eu-west-1-889960878219/xgboost-2020-08-04-08-12-17-199"
+                },
+                "TransformResources": {
+                  "InstanceCount": 1,
+                  "InstanceType": "ml.m5.large"
+                }
+              },
+              "Type": "Task",
+              "End": true
+            },
+            "Worse model": {
+              "Parameters": {
+                "Error": "The new model is not accurate enough. Validation loss:<stepfunctions.inputs.placeholders.StepInput object at 0x7f6a2e4b4400>"
+              },
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        }
+      RoleArn: arn:aws:iam::889960878219:role/StepFunctionsWorkflowExecutionRole
