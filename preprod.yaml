@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for Amazon SageMaker Endpoint
+
+Parameters:
+  ModelName:
+    Description: 'xgboost-2020-08-03-22-36-48-347'
+    Type: String
+  ModelDataUrl:
+    Description: 's3://antonio-rodriguez-workshop/glovo/sandbox/builtin/output/xgboost-2020-08-03-22-36-48-347/output/model.tar.gz'
+    Type: String
+  TrainingImage:
+    Description: '685385470294.dkr.ecr.eu-west-1.amazonaws.com/xgboost:latest'
+    Type: String
+  InstanceType:
+    Description: Instance type
+    Type: String
+    Default: ml.m4.xlarge
+  InstanceCount:
+    Description: Instance count
+    Type: String
+    Default: 1
+  RoleArn:
+    Description: 'arn:aws:iam::889960878219:role/service-role/AmazonSageMaker-ExecutionRole-20180920T165537'
+    Type: String
+
+Resources:
+  Model:
+    Type: "AWS::SageMaker::Model"
+    Properties: 
+      Containers: 
+        - 
+          Image: !Ref TrainingImage
+          ModelDataUrl: !Ref ModelDataUrl
+      ExecutionRoleArn: !Ref RoleArn
+      ModelName: !Ref ModelName
+
+  Endpoint:
+    Type: "AWS::SageMaker::Endpoint"
+    Properties: 
+      EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
+      #Using a custom name will prevent updates with change sets
+      #EndpointName: !Ref EndpointName
+
+  EndpointConfig:
+    Type: "AWS::SageMaker::EndpointConfig"
+    Properties:
+      ProductionVariants: 
+        -
+          ModelName: !GetAtt Model.ModelName
+          VariantName: variant-1
+          InitialInstanceCount: !Ref InstanceCount
+          InstanceType: !Ref InstanceType
+          InitialVariantWeight: 1.0
+      #Using a custom name will prevent updates with change sets
+      #EndpointConfigName: !Ref EndpointConfigName
+
+Outputs:
+  EndpointId:
+    Value: !Ref Endpoint
+  EndpointName:
+    Value: !GetAtt Endpoint.EndpointName
