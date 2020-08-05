@@ -46,7 +46,7 @@ You can continue with the next step in the meantime.
 
 ### 3. **Update your new AWS IAM role**
 
-- Open the AWS IAM console by going to "Services" in the top menu, and choosing "IAM".
+- Open the AWS IAM console for your account at https://console.aws.amazon.com/iam/.
 - Choose "Roles", and search for the role you created in the previous step (it should be named "AmazonSageMaker-ExecutionRole-YYYYMMDDTHHmmSS"), and click on it.
 - Choose "Attach policies", and search for "AWSLambdaFullAccess", select the checkbox next to it and choose "Attach policy". Repeat this step for attaching the policies "AmazonS3FullAccess", "IAMFullAccess", "AWSStepFunctionsFullAccess", "AWSCodePipeline-FullAccess". *Note in a real scenario we would split the tasks on different and more specific roles following a least-privilege policy*.
 - Now choose "Trust relationships", and "Edit trust relationship". Replace the policy shown with the following for allowing the execution of the AWS Step Functions workflow in our notebook:
