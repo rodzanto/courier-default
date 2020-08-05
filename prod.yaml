@@ -5,12 +5,6 @@ Parameters:
   ModelName:
     Description: Amazon SageMaker training job name
     Type: String
-  ModelDataUrl:
-    Description: Location of the model artifact in Amazon S3
-    Type: String
-  TrainingImage:
-    Description: Image for the model container
-    Type: String
   InstanceType:
     Description: Instance type
     Type: String
@@ -19,21 +13,8 @@ Parameters:
     Description: Instance count
     Type: String
     Default: 1
-  RoleArn:
-    Description: ARN of your Amazon SageMaker execution role
-    Type: String
 
 Resources:
-  Model:
-    Type: "AWS::SageMaker::Model"
-    Properties: 
-      Containers: 
-        - 
-          Image: !Ref TrainingImage
-          ModelDataUrl: !Ref ModelDataUrl
-      ExecutionRoleArn: !Ref RoleArn
-      ModelName: !Ref ModelName
-
   Endpoint:
     Type: "AWS::SageMaker::Endpoint"
     Properties: 
