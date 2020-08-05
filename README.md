@@ -75,7 +75,7 @@ You can continue with the next step in the meantime.
 ### 3. **Run the required notebooks for each lab**
 
 - Go back to the Amazon SageMaker console, choose "Notebook instances", and open the notebook you created by choosing "Open Jupyter". Note the notebook instance should be in "In service" status for having this option.
-- Click on the sample notebooks provided (in order):
+- Click on the sample notebooks provided (in order), and go through the cells for each Lab as indicated by the workshop staff:
   - Lab #1: Data scientist sandbox [1.sandbox](./1.sandbox.ipynb)
   - Lab #2: Prepare the ML workflow [2.workflow](./2.workflow.ipynb)
   - Lab #3: Build the ML pipeline [3.pipeline](./3.pipeline.ipynb)
