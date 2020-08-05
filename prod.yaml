@@ -2,25 +2,25 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template for Amazon SageMaker Endpoint
 
 Parameters:
-  ModelName:
-    Description: 'xgboost-2020-08-03-22-36-48-347'
+  ModelName: 'xgboost-2020-08-03-22-36-48-347'
+    Description: 'Amazon SageMaker training job name'
     Type: String
-  ModelDataUrl:
-    Description: 's3://antonio-rodriguez-workshop/glovo/sandbox/builtin/output/xgboost-2020-08-03-22-36-48-347/output/model.tar.gz'
+  ModelDataUrl: 's3://antonio-rodriguez-workshop/glovo/sandbox/builtin/output/xgboost-2020-08-03-22-36-48-347/output/model.tar.gz'
+    Description: 'Location of the model artifact in Amazon S3'
     Type: String
-  TrainingImage:
-    Description: '685385470294.dkr.ecr.eu-west-1.amazonaws.com/xgboost:latest'
+  TrainingImage: '685385470294.dkr.ecr.eu-west-1.amazonaws.com/xgboost:latest'
+    Description: 'Image for the model container'
     Type: String
-  InstanceType:
+  InstanceType: 'ml.m4.xlarge'
     Description: Instance type
     Type: String
-    Default: ml.m4.xlarge
-  InstanceCount:
+    Default: 'ml.m4.xlarge'
+  InstanceCount: 1
     Description: Instance count
     Type: String
     Default: 1
-  RoleArn:
-    Description: 'arn:aws:iam::889960878219:role/service-role/AmazonSageMaker-ExecutionRole-20180920T165537'
+  RoleArn: 'arn:aws:iam::889960878219:role/service-role/AmazonSageMaker-ExecutionRole-20180920T165537'
+    Description: 'ARN of your Amazon SageMaker execution role'
     Type: String
 
 Resources:
