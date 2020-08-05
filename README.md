@@ -56,7 +56,6 @@ You can continue with the next step in the meantime.
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "",
       "Effect": "Allow",
       "Principal": {
         "Service": [
