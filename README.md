@@ -61,7 +61,8 @@ You can continue with the next step in the meantime.
         "Service": [
           "states.amazonaws.com",
           "lambda.amazonaws.com",
-          "sagemaker.amazonaws.com"
+          "sagemaker.amazonaws.com",
+          "codepipeline.amazonaws.com"
         ]
       },
       "Action": "sts:AssumeRole"
