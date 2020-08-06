@@ -79,7 +79,8 @@ You can continue with the next step in the meantime.
   - Lab #1: Data scientist sandbox [1.sandbox](./1.sandbox.ipynb)
   - Lab #2: Prepare the ML workflow [2.workflow](./2.workflow.ipynb)
   - Lab #3: Build the ML pipeline [3.pipeline](./3.pipeline.ipynb)
-  follow the instructions provided in each one.
+  
+  Select the kernel "conda_python3" and follow the instructions provided in each one.
 
 Note the following important tips:
   - Some cells require you to replace some placeholders with e.g. your bucket name, Account ID, or Role created before running. Make sure you read any comments before running those.
