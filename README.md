@@ -83,8 +83,8 @@ You can continue with the next step in the meantime.
   Select the kernel "conda_python3" and follow the instructions provided in each one.
 
 Note the following important tips:
-  - Some cells require you to replace some placeholders with e.g. your bucket name, Account ID, or Role created before running. Make sure you read any comments before running those.
-  - If it's the first time you work with Jupyter notebooks you can ask staff assistance. Remember you can run the cells one by one with Shift+Enter or the Run button in the top bar.
+  - Some cells require you to replace some placeholders with e.g. your Bucket Name or the Role ARN created before running. Make sure you read any comments before running those.
+  - If it's the first time you work with Jupyter notebooks you can ask staff assistance. Remember to use Shift+Enter to execute each cell, or click on the Run button at the top. The cell execution will be displayed as "*", once the cell is completed the "*" is replaced with a digit indicating it is ready for the next cell execution.
   - It is recommended to have the notebooks in "Trusted" status for keeping the cells outputs. If your notebook shows "Not trusted" in the top bar, you can click on it for choosing "Trust".
 
 ### **Some Links and Documentation:**
